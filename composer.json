@@ -1,0 +1,26 @@
+{
+  "name": "zenthangplus/amazon-helper",
+  "type": "library",
+  "authors": [
+    {
+      "name": "zenthangplus",
+      "email": "zenthangplus@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ZenThangPlus\\AmazonHelper\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  }
+}
