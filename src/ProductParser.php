@@ -6,73 +6,29 @@ use ZenThangPlus\AmazonHelper\Exceptions\ParserException;
 use ZenThangPlus\AmazonHelper\Helpers\UnitConverter;
 
 class ProductParser extends Parser {
-    /**
-     * Title of current product
-     *
-     * @var string
-     */
-    private $title;
 
     /**
-     * Price of current product
-     *
-     * @var float
+     * @var array
      */
-    private $price;
+    private $details;
 
     /**
-     * Weight of current product
-     *
-     * @var float
-     */
-    private $weight = 0;
-
-    /**
-     * Width of current product
-     *
-     * @var float
-     */
-    private $width = 0;
-
-    /**
-     * Height of current product
-     *
-     * @var float
-     */
-    private $height = 0;
-
-    /**
-     * Depth of current product
-     *
-     * @var float
-     */
-    private $depth = 0;
-
-    /**
-     * Get product title
+     * Parse product title
      *
      * @return string
      */
-    public function get_title(): string {
-        if ( isset( $this->title ) ) {
-            return $this->title;
-        }
-        $element     = $this->doc->getElementById( 'productTitle' );
-        $this->title = trim( $element->textContent );
-        return $this->title;
+    public function title(): string {
+        $element = $this->doc->getElementById( 'productTitle' );
+        return trim( $element->textContent );
     }
 
     /**
-     * Get product price
+     * Parse product price
      *
      * @return float
      * @throws ParserException
      */
-    public function get_price(): float {
-        if ( isset( $this->price ) ) {
-            return $this->price;
-        }
-
+    public function price(): float {
         /**
          * Demo for this case: https://www.amazon.com/Anker-Portable-Reader-RS-MMC-Micro/dp/B006T9B6R2/
          */
@@ -107,59 +63,76 @@ class ProductParser extends Parser {
         if ( ! is_numeric( $price ) ) {
             throw new ParserException( "Cannot parse product price" );
         }
-        $this->price = (float) $price;
-        return $this->price;
+        return (float) $price;
     }
 
     /**
-     * Get product weight
+     * Parse product weight
      *
      * @return float
      */
-    public function get_weight(): float {
+    public function weight(): float {
         $this->fetch_details();
-        return $this->weight;
+        $weight = 0;
+        if ( ! isset( $this->details['Item Weight'] ) ) {
+            return $weight;
+        }
+        preg_match( '/([0-9\.]+)\s*(pounds|ounces)$/is', $this->details['Item Weight'], $matches );
+        if ( isset( $matches[2] ) ) {
+            switch ( $matches[2] ) {
+                case 'pounds':
+                    $weight = UnitConverter::pounds_to_kilograms( (float) $matches[1] );
+                    break;
+                case 'ounces':
+                    $weight = UnitConverter::ounces_to_kilograms( (float) $matches[1] );
+                    break;
+            }
+        }
+        return $weight;
     }
 
     /**
-     * Get product width
+     * Parse product width
      *
      * @return float
      */
-    public function get_width(): float {
+    public function width(): float {
         $this->fetch_details();
-        return $this->width;
+        $size = $this->extract_dimensions( $this->details['Product Dimensions'] );
+        return isset( $size[0] ) ? UnitConverter::inches_to_meters( (float) $size[0] ) : 0;
     }
 
     /**
-     * Get product height
+     * Parse product height
      *
      * @return float
      */
-    public function get_height(): float {
+    public function height(): float {
         $this->fetch_details();
-        return $this->height;
+        $size = $this->extract_dimensions( $this->details['Product Dimensions'] );
+        return isset( $size[1] ) ? UnitConverter::inches_to_meters( (float) $size[1] ) : 0;
     }
 
     /**
-     * Get product depth
+     * Parse product depth
      *
      * @return float
      */
-    public function get_depth(): float {
+    public function depth(): float {
         $this->fetch_details();
-        return $this->depth;
+        $size = $this->extract_dimensions( $this->details['Product Dimensions'] );
+        return isset( $size[2] ) ? UnitConverter::inches_to_meters( (float) $size[2] ) : 0;
     }
 
     /**
      * Fetch product details
      */
     private function fetch_details() {
-        static $_fetch_details;
         //make sure this function execute once
-        if ( isset( $_fetch_details ) ) {
+        if ( isset( $this->details ) ) {
             return;
         }
+        $this->details = [];
 
         $details_ele = $this->doc->getElementById( 'prodDetails' );
         $tables_list = $details_ele->getElementsByTagName( 'table' );
@@ -188,57 +161,22 @@ class ProductParser extends Parser {
 
                 $name  = trim( $th->textContent );
                 $value = trim( $td->textContent );
-                $this->sanitize( $name, $value );
+
+                $this->details[ $name ] = $value;
             }
         }
-        $_fetch_details = true;
     }
 
     /**
-     * Convert detail string to property
+     * Extract dimensions to array
      *
-     * @param string $name
-     * @param string $value
-     */
-    private function sanitize( $name, $value ) {
-        switch ( $name ) {
-            case 'Item Weight':
-                preg_match( '/([0-9\.]+)\s*(pounds|ounces)$/is', $value, $matches );
-                if ( isset( $matches[2] ) ) {
-                    switch ( $matches[2] ) {
-                        case 'pounds':
-                            $this->weight = UnitConverter::pounds_to_kilograms( (float) $matches[1] );
-                            break;
-                        case 'ounces':
-                            $this->weight = UnitConverter::ounces_to_kilograms( (float) $matches[1] );
-                            break;
-                    }
-                }
-                break;
-            case 'Product Dimensions':
-                $sizes_str    = preg_replace( '/\s*inches$/is', '', $value );
-                $size         = explode( ' x ', $sizes_str );
-                $this->width  = isset( $size[0] ) ? UnitConverter::inches_to_meters( (float) $size[0] ) : 0;
-                $this->height = isset( $size[1] ) ? UnitConverter::inches_to_meters( (float) $size[1] ) : 0;
-                $this->depth  = isset( $size[2] ) ? UnitConverter::inches_to_meters( (float) $size[2] ) : 0;
-                break;
-        }
-    }
-
-    /**
-     * Transfer parse data to product detail
+     * @param string $dimensions
      *
-     * @return ProductDetail
-     * @throws ParserException
+     * @return array
      */
-    public function to_detail() {
-        $detail         = new ProductDetail();
-        $detail->price  = $this->get_price();
-        $detail->title  = $this->get_title();
-        $detail->weight = $this->get_weight();
-        $detail->width  = $this->get_width();
-        $detail->height = $this->get_height();
-        $detail->depth  = $this->get_depth();
-        return $detail;
+    private function extract_dimensions( $dimensions ) {
+        $sizes_str = preg_replace( '/\s*inches$/is', '', $dimensions );
+        $size      = explode( ' x ', $sizes_str );
+        return $size;
     }
 }
