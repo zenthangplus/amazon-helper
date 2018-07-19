@@ -2,7 +2,6 @@
 
 namespace ZenThangPlus\AmazonHelper\Exceptions;
 
-class ParserException extends \Exception
-{
+class ParserException extends \Exception {
 
 }

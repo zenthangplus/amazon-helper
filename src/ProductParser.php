@@ -232,13 +232,13 @@ class ProductParser extends Parser {
      * @throws ParserException
      */
     public function to_detail() {
-        $detail = new ProductDetail();
-        $detail->price = $this->get_price();
-        $detail->title = $this->get_title();
+        $detail         = new ProductDetail();
+        $detail->price  = $this->get_price();
+        $detail->title  = $this->get_title();
         $detail->weight = $this->get_weight();
-        $detail->width = $this->get_width();
+        $detail->width  = $this->get_width();
         $detail->height = $this->get_height();
-        $detail->depth = $this->get_depth();
+        $detail->depth  = $this->get_depth();
         return $detail;
     }
 }

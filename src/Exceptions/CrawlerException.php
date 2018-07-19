@@ -2,7 +2,6 @@
 
 namespace ZenThangPlus\AmazonHelper\Exceptions;
 
-class CrawlerException extends \Exception
-{
+class CrawlerException extends \Exception {
 
 }
