@@ -74,10 +74,11 @@ class ProductParser extends Parser {
     public function weight(): float {
         $this->fetch_details();
         $weight = 0;
-        if ( ! isset( $this->details['Item Weight'] ) ) {
+        $key = 'Shipping Weight';
+        if ( ! isset( $this->details[$key] ) ) {
             return $weight;
         }
-        preg_match( '/([0-9\.]+)\s*(pounds|ounces)$/is', $this->details['Item Weight'], $matches );
+        preg_match( '/([0-9\.]+)\s*(pounds|ounces)/is', $this->details[$key], $matches );
         if ( isset( $matches[2] ) ) {
             switch ( $matches[2] ) {
                 case 'pounds':
