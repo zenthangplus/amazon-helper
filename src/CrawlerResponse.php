@@ -4,6 +4,13 @@ namespace ZenThangPlus\AmazonHelper;
 
 class CrawlerResponse {
     /**
+     * Response from this url
+     *
+     * @var string
+     */
+    private $url;
+
+    /**
      * Http code response from request
      *
      * @var int
@@ -20,12 +27,23 @@ class CrawlerResponse {
     /**
      * CrawlerResponse constructor.
      *
+     * @param string $url
      * @param int $http_code
      * @param string $data
      */
-    public function __construct( $http_code, $data ) {
+    public function __construct( string $url, int $http_code, string $data ) {
+        $this->url       = $url;
         $this->http_code = $http_code;
         $this->data      = $data;
+    }
+
+    /**
+     * Get remote url
+     *
+     * @return string
+     */
+    public function get_url() {
+        return $this->url;
     }
 
     /**

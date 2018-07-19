@@ -4,6 +4,13 @@ namespace ZenThangPlus\AmazonHelper;
 
 class Product extends Price {
     /**
+     * Product url on Amazon
+     *
+     * @var string
+     */
+    private $url;
+
+    /**
      * Title of current product
      *
      * @var string
@@ -44,6 +51,15 @@ class Product extends Price {
      * @var float
      */
     private $depth = 0;
+
+    /**
+     * Set product's url
+     *
+     * @param string $url
+     */
+    public function set_url(string $url) {
+        $this->url = $url;
+    }
 
     /**
      * Set product's title
@@ -97,6 +113,15 @@ class Product extends Price {
      */
     public function set_depth(float $depth) {
         $this->depth = $depth;
+    }
+
+    /**
+     * Get product's url
+     *
+     * @return string
+     */
+    public function url(): string {
+        return $this->url;
     }
 
     /**

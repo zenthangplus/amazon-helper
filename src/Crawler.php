@@ -95,6 +95,6 @@ class Crawler {
         }
         $http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
         curl_close( $ch );
-        return new CrawlerResponse( $http_code, $data );
+        return new CrawlerResponse( $url, $http_code, $data );
     }
 }

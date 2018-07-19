@@ -65,6 +65,24 @@ abstract class Price
     }
 
     /**
+     * Get weight coefficient
+     *
+     * @return float
+     */
+    public function get_weight_coefficient(): float {
+        return $this->weight_coefficient;
+    }
+
+    /**
+     * Get dimension coefficient
+     *
+     * @return float
+     */
+    public function get_dimension_coefficient(): float {
+        return $this->dimension_coefficient;
+    }
+
+    /**
      * Add custom shipping fee
      *
      * @param float $fee
